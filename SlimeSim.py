@@ -6,19 +6,28 @@ from collections import deque
 pygame.init()
 clock = pygame.time.Clock()
 
-screenXsize = 600
-screenYsize = 600
+screenXsize = 250 # Sim size
+screenYsize = 250
+displayWindowX = 700 # Display size
+displayWindowY = 700
+
+screenSize = (displayWindowX, displayWindowY)
+simulationSize = (screenXsize, screenYsize)
+scalingFactor = screenSize[0] // simulationSize[0]  # Should be 6 in this case
+
+displaySurface = pygame.display.set_mode(screenSize) # DisplaySurface determines the size of the window
+screen = pygame.Surface(simulationSize) # screen handles the actual sim
+
 backgroundColor = (0, 0, 0)
 
-screen = pygame.display.set_mode((screenXsize, screenYsize))
 screen.fill(backgroundColor) 
-pygame.display.set_caption("Slime Sim")
+pygame.display.set_caption("Slime Mold Sim")
 pygame.display.update()
 
 pi = math.pi
 
-agentCount = 50
-trailSize = 5
+agentCount = 150
+trailSize = 1
 trailEvaporationRate = 0.01
 #agentTrails = []
 
@@ -47,24 +56,24 @@ class Agent:
 
         
         # Forward movement
-        self.x += round(math.cos(self.angle), 1)
-        self.y += round(math.sin(self.angle), 1)
+        self.x += round(math.cos(self.angle), 2)
+        self.y += round(math.sin(self.angle), 2)
         self.trails.append((self.x, self.y, 1.0))
 
     def trailEvaporation(self):
         
         newTrails = []
-        surface = pygame.Surface((screenXsize, screenYsize), pygame.SRCALPHA)
+        #surface = pygame.Surface((screenXsize, screenYsize), pygame.SRCALPHA)
 
         for x, y, trailIntensity in self.trails:
             newTrailIntensity = round(trailIntensity - trailEvaporationRate, 2)
             if newTrailIntensity > 0:
                 newTrails.append((x, y, newTrailIntensity))
                 colorValue = int(newTrailIntensity * 255)
-                pygame.draw.rect(surface, (colorValue, colorValue, colorValue), (x, y, trailSize, trailSize))
+                pygame.draw.rect(screen, (colorValue, colorValue, colorValue), (x, y, trailSize, trailSize))
         
-        self.trails = newTrails
-        screen.blit(surface, (0, 0))
+        self.trails = deque(newTrails)
+        #screen.blit(surface, (0, 0))
         
         # i = 0
         # while i < (len(agentTrails)):
@@ -110,11 +119,9 @@ def main():
             agent.drawAgent()
             agent.trailEvaporation()
 
+        scaledSurface = pygame.transform.scale(screen, screenSize)
+        displaySurface.blit(scaledSurface, (0, 0))
         pygame.display.update()
 
 if __name__ == "__main__":
     main()
-
-
-
-        
