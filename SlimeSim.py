@@ -2,6 +2,7 @@ import pygame
 import random
 import math
 from collections import deque
+#import getFPS
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -26,9 +27,9 @@ pygame.display.update()
 
 pi = math.pi
 
-agentCount = 150
+agentCount = 250
 trailSize = 1
-trailEvaporationRate = 0.01
+trailEvaporationRate = 0.03
 #agentTrails = []
 
 
@@ -91,9 +92,24 @@ class Agent:
         pygame.draw.rect(screen, (255, 255, 255), (self.x, self.y, trailSize, trailSize))
 
 
+
+class FPS:
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont("Verdana", 20)
+        self.text = self.font.render(str(self.clock.get_fps()), True, (150, 150, 255))
+
+    def render(self, display):
+        self.text = self.font.render(str(round(self.clock.get_fps(), 1)), True, (150, 150, 255))
+        display.blit(self.text, (10, 10))
+
+
 def main():
 
     running = True
+    #fps = getFPS.FPS()
+    fps = FPS()
+
 
     agents = []
     for i in range(agentCount):
@@ -106,12 +122,13 @@ def main():
     
     while running:
 
-        for event in pygame.event.get(): # For loop through the event queue             
-            if event.type == pygame.QUIT: # Check for QUIT event
+        for event in pygame.event.get():             
+            if event.type == pygame.QUIT: 
                 running = False
 
-        clock.tick(60) # 60 FPS
+        fps.clock.tick(60) # 60 FPS
         screen.fill(backgroundColor)
+        
 
 
         for agent in agents: 
@@ -121,6 +138,7 @@ def main():
 
         scaledSurface = pygame.transform.scale(screen, screenSize)
         displaySurface.blit(scaledSurface, (0, 0))
+        fps.render(displaySurface)
         pygame.display.update()
 
 if __name__ == "__main__":
